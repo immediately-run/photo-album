@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { LibraryState } from '../hooks/useLibrary';
 import Icon from './Icon';
 
@@ -10,14 +10,25 @@ interface Props {
 function LibraryMenu({ lib }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const { name, setName } = lib;
+  // Save the name whenever the popover closes, however it closes.
+  const commitName = useCallback(() => {
+    const v = nameRef.current?.value.trim();
+    if (v !== undefined && v !== name) setName(v);
+  }, [name, setName]);
+  const close = useCallback(() => {
+    commitName();
+    setOpen(false);
+  }, [commitName]);
 
   useEffect(() => {
     if (!open) return;
     const onDown = (e: PointerEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) close();
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') close();
     };
     document.addEventListener('pointerdown', onDown);
     document.addEventListener('keydown', onKey);
@@ -25,11 +36,11 @@ function LibraryMenu({ lib }: Props) {
       document.removeEventListener('pointerdown', onDown);
       document.removeEventListener('keydown', onKey);
     };
-  }, [open]);
+  }, [open, close]);
 
   const sharedLabel = lib.shared?.name ?? 'Shared';
   const act = (fn: () => Promise<void>) => {
-    setOpen(false);
+    close();
     void fn();
   };
 
@@ -65,7 +76,7 @@ function LibraryMenu({ lib }: Props) {
         aria-haspopup="menu"
         aria-expanded={open}
         disabled={lib.busy}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => (open ? close() : setOpen(true))}
       >
         <Icon name="users" size={16} /> <span className="hide-sm">Share</span>
       </button>
@@ -86,6 +97,19 @@ function LibraryMenu({ lib }: Props) {
               <Icon name="close" size={16} /> Forget “{sharedLabel}”
             </button>
           )}
+          <label className="popover-field">
+            <span>Your name</span>
+            <input
+              ref={nameRef}
+              defaultValue={lib.name}
+              placeholder="Shown next to the photos you add"
+              maxLength={40}
+              onBlur={commitName}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.currentTarget.blur();
+              }}
+            />
+          </label>
         </div>
       )}
     </div>

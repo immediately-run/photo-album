@@ -23,7 +23,8 @@ function App() {
   const auth = useAuth();
   const [nav, setNav] = useState<Nav | null>(null);
 
-  const me = auth.user?.login ?? '';
+  // Stage apps get no login from the host; fall back to the name in the private config.
+  const me = auth.user?.login || lib.name;
   const by = me || 'someone';
   const store = lib.store;
   const live = lib.active === 'shared';

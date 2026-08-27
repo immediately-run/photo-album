@@ -58,6 +58,9 @@ h3 { font: 600 17px/1.25 var(--disp); }
 }
 .popover [role="menuitem"]:hover { background: var(--panel-2); }
 .popover [role="menuitem"].danger { color: var(--accent-hot); }
+.popover-field { display: flex; flex-direction: column; gap: 4px; padding: 10px 8px 6px; border-top: 1px solid var(--line-2); margin-top: 6px; }
+.popover-field span { font-size: 12px; color: var(--ink-2); }
+.popover-field input { width: 100%; padding: 8px 10px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--panel); color: var(--ink); font: inherit; }
 
 /* ---- buttons ---- */
 .btn {

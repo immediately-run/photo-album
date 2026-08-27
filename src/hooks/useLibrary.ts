@@ -1,6 +1,6 @@
 // Boot + "which library am I looking at" state. Two libraries: the private one
 // (settings mount, zero prompts) and at most one remembered shared space.
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   createSharedStore,
   openPrivateStore,
@@ -17,6 +17,8 @@ interface Config {
   spaceId?: string;
   spaceName?: string;
   library?: LibraryKey;
+  /** Shown next to your photos when the host exposes no login (stage apps). */
+  displayName?: string;
 }
 
 export interface LibraryState {
@@ -30,6 +32,9 @@ export interface LibraryState {
   readOnly: boolean;
   busy: boolean;
   notice: string | null;
+  /** Display name from the private config ('' when unset). */
+  name: string;
+  setName: (name: string) => void;
   select: (key: LibraryKey) => void;
   openShared: () => Promise<void>;
   createShared: () => Promise<void>;
@@ -56,6 +61,8 @@ export function useLibrary(): LibraryState {
   const [active, setActive] = useState<LibraryKey>('private');
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [name, setNameState] = useState('');
+  const cfgRef = useRef<Config>({});
 
   useEffect(() => {
     // React StrictMode runs this twice in dev: the flag makes the first run inert.
@@ -66,6 +73,8 @@ export function useLibrary(): LibraryState {
         if (cancelled) return;
         const cfg = await readJson<Config>(configPath(p), {});
         if (cancelled) return;
+        cfgRef.current = cfg;
+        setNameState(cfg.displayName ?? '');
         let s: Store | null = null;
         if (cfg.spaceId) {
           s = await openRememberedSpace(cfg.spaceId);
@@ -90,8 +99,11 @@ export function useLibrary(): LibraryState {
     };
   }, []);
 
+  /** Merge `patch` into the stored config (an explicit `undefined` clears a key). */
   const persist = useCallback(
-    async (next: Config) => {
+    async (patch: Config) => {
+      const next = { ...cfgRef.current, ...patch };
+      cfgRef.current = next;
       if (!priv || priv.mode === 'ro') return;
       try {
         await writeJson(configPath(priv), next);
@@ -141,9 +153,18 @@ export function useLibrary(): LibraryState {
       run(async () => {
         setShared(null);
         setActive('private');
-        await persist({ library: 'private' });
+        await persist({ spaceId: undefined, spaceName: undefined, library: 'private' });
       }),
     [run, persist],
+  );
+
+  const setName = useCallback(
+    (n: string) => {
+      const v = n.trim().slice(0, 40);
+      setNameState(v);
+      void persist({ displayName: v || undefined });
+    },
+    [persist],
   );
 
   const store = active === 'shared' ? shared : priv;
@@ -157,6 +178,8 @@ export function useLibrary(): LibraryState {
     readOnly: !store || store.mode === 'ro',
     busy,
     notice,
+    name,
+    setName,
     select,
     openShared,
     createShared,
