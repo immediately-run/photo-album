@@ -63,7 +63,7 @@ function AlbumList({ store, readOnly, live, me, by, showBy, onOpen }: Props) {
             : 'Albums are folders of pictures. Drop photos in; they are resized before they are stored.'}
         </p>
       </div>
-      {!readOnly && !creating && (
+      {!readOnly && !creating && albums !== null && albums.length > 0 && (
         <button type="button" className="btn btn-primary" onClick={() => setCreating(true)}>
           <Icon name="plus" size={16} /> New album
         </button>
