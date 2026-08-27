@@ -1,9 +1,26 @@
-# Working in this repo
+# Working in photo-album
 
-This is an **immediately.run app**: React + TypeScript that loads from GitHub and
-transpiles in the browser (no server, no build step at runtime). Keep the rules
-below or the app breaks *only* on immediately.run while still looking fine in
-local `vite dev` — the most common silent failure.
+Photo album is an **immediately.run app**: albums are folders of pictures on the
+platform filesystem, kept private (settings mount) or shared through a space.
+It is React + TypeScript that loads from GitHub and transpiles in the browser
+(no server, no build step at runtime). Keep the rules below or the app breaks
+*only* on immediately.run while still looking fine in local `vite dev` — the
+most common silent failure.
+
+## App layout
+
+- `src/lib/store.ts` — the canonical persistence wrapper (private store, pick /
+  create / re-open shared spaces, `pollDir`). Carries the `SandboxMount` so
+  images can be read with `useObjectUrl`.
+- `src/lib/albums.ts` — file layout: `albums/<id>/album.json`, `photos/`,
+  `thumbs/`, `meta/` (one file per photo and caption → safe for several
+  members). `src/lib/image.ts` — canvas downscale + thumbnail.
+- `src/hooks/useLibrary.ts` — boot (guarded against StrictMode's double effect),
+  remembered space in `<private>/config.json`. `useImageUrl` = SDK
+  `useObjectUrl` with an `fs.readFile` → blob URL fallback for `vite dev`.
+- Shared stores are **polled** (4 s) — the host sends no remote change events.
+- No `localStorage`, no `import.meta` (use the `__APP_DEV__` define), SDK
+  imports from subpaths only.
 
 ## Hard rules (these break immediately.run if violated)
 
