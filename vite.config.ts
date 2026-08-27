@@ -17,4 +17,7 @@ export default defineConfig({
     { enforce: 'pre', ...mdx() },
     react(),
   ],
+  // `src/lib/store.ts` keys its "no host, write to ./devfs-playground" path on
+  // this global — never `import.meta`, which the sandbox transpiler rejects.
+  define: { __APP_DEV__: JSON.stringify(process.env.NODE_ENV !== 'production') },
 })
