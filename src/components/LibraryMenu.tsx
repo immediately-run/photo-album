@@ -75,6 +75,9 @@ function LibraryMenu({ lib }: Props) {
         className="btn btn-ghost"
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-label="Share"
+        title="Share"
+
         disabled={lib.busy}
         onClick={() => (open ? close() : setOpen(true))}
       >

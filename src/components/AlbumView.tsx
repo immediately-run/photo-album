@@ -194,7 +194,7 @@ function AlbumView({ store, albumId, readOnly, live, me, by, showBy, onBack }: P
           </div>
           <div className="actions">
             {list.length > 0 && (
-              <button type="button" className="btn btn-ghost" onClick={() => setSlideshow(0)}>
+              <button type="button" className="btn btn-ghost" onClick={() => setSlideshow(0)} aria-label="Slideshow" title="Slideshow">
                 <Icon name="play" size={16} /> <span className="hide-sm">Slideshow</span>
               </button>
             )}
