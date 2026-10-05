@@ -4,7 +4,7 @@ import { useAlbumPhotos } from '../hooks/useAlbumPhotos';
 import { useUploader } from '../hooks/useUploader';
 import { albumDir, deleteAlbum, deletePhoto, readAlbum, resolveCover, saveAlbum, savePhotoMeta } from '../lib/albums';
 import { formatDate, pluralize, who } from '../lib/format';
-import { pollDir, type Store } from '../lib/store';
+import { watchDir, type Store } from '../lib/store';
 import type { Album, PhotoMeta } from '../lib/types';
 import AlbumForm from './AlbumForm';
 import Icon from './Icon';
@@ -55,7 +55,7 @@ function AlbumView({ store, albumId, readOnly, live, me, by, showBy, onBack }: P
 
   useEffect(() => {
     if (!live) return;
-    return pollDir(albumDir(root, albumId), bump, 4000);
+    return watchDir(albumDir(root, albumId), bump); // R3-901: watch, not poll — recursive, covers photos/ + meta/
   }, [live, root, albumId]);
 
   const fail = (what: string) => (e: unknown) =>

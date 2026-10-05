@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useState } from 'react';
 import { albumsDir, createAlbum, listAlbums } from '../lib/albums';
-import { pollDir, type Store } from '../lib/store';
+import { watchDir, type Store } from '../lib/store';
 import type { AlbumSummary } from '../lib/types';
 import AlbumCard from './AlbumCard';
 import AlbumForm from './AlbumForm';
@@ -39,7 +39,7 @@ function AlbumList({ store, readOnly, live, me, by, showBy, onOpen }: Props) {
 
   useEffect(() => {
     if (!live) return;
-    return pollDir(albumsDir(store.root), bump, 4000);
+    return watchDir(albumsDir(store.root), bump); // R3-901: watch, not poll
   }, [live, store.root]);
 
   const create = async (v: { title: string; description: string }) => {
