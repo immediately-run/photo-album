@@ -27,7 +27,7 @@ export function useAlbumPhotos(root: string, albumId: string, live: boolean) {
 
   useEffect(() => {
     if (!live) return;
-    // R3-901: ONE recursive watch on the album dir replaces the photos/ + meta/
+    // R3-901: one recursive watch on the album dir replaces the photos/ + meta/
     // polls (both live under it; the relay reports the changed path).
     return watchDir(albumDir(root, albumId), bump);
   }, [live, root, albumId]);
